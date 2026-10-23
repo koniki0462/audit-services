@@ -1,6 +1,8 @@
 package com.auditapp.audit.config;
 
 import com.auditapp.audit.domain.AuditStatus;
+import com.auditapp.audit.domain.EntityType;
+import com.auditapp.audit.domain.OrganizationStatus;
 import com.auditapp.audit.domain.Severity;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,5 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(String.class, AuditStatus.class, AuditStatus::from);
         registry.addConverter(String.class, Severity.class, Severity::from);
+        registry.addConverter(String.class, EntityType.class, EntityType::from);
+        registry.addConverter(String.class, OrganizationStatus.class, OrganizationStatus::from);
     }
 }

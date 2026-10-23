@@ -5,4 +5,8 @@ public class NotFoundException extends RuntimeException {
     public NotFoundException(String type, String id) {
         super(type + " " + id + " not found");
     }
+
+    public NotFoundException(String message) {
+        super(message);
+    }
 }

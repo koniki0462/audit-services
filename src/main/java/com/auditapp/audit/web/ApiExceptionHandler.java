@@ -1,5 +1,7 @@
 package com.auditapp.audit.web;
 
+import com.auditapp.audit.service.ConflictException;
+import com.auditapp.audit.service.ForbiddenException;
 import com.auditapp.audit.service.NotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.LinkedHashMap;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +36,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    ProblemDetail badCredentials(BadCredentialsException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    ProblemDetail forbidden(ForbiddenException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    ProblemDetail conflict(ConflictException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ProblemDetail badParameter(MethodArgumentTypeMismatchException e) {
         Throwable cause = e.getMostSpecificCause();
@@ -48,7 +66,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
-    ProblemDetail conflict(OptimisticLockingFailureException e) {
+    ProblemDetail staleVersion(OptimisticLockingFailureException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The record was changed by someone else. Reload and try again.");
     }
 

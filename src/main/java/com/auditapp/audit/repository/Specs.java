@@ -5,17 +5,18 @@ import com.auditapp.audit.domain.AuditStatus;
 import com.auditapp.audit.domain.Finding;
 import com.auditapp.audit.domain.Severity;
 import java.util.Locale;
+import java.util.Objects;
 import org.springframework.data.jpa.domain.Specification;
 
-/** Optional filters for the list endpoints. A null argument means no filter. */
+/** Filters for the list endpoints. The organization is required; for the other arguments null means no filter. */
 public final class Specs {
 
     private Specs() {
     }
 
     /** Matches like the front end's filterAudits: case-insensitive substring of id, title, department or auditor. */
-    public static Specification<Audit> auditMatches(String query, AuditStatus status) {
-        Specification<Audit> spec = (root, q, cb) -> cb.conjunction();
+    public static Specification<Audit> auditMatches(String organizationId, String query, AuditStatus status) {
+        Specification<Audit> spec = inOrganization(organizationId);
         if (status != null) {
             spec = spec.and((root, q, cb) -> cb.equal(root.get("status"), status));
         }
@@ -30,8 +31,9 @@ public final class Specs {
         return spec;
     }
 
-    public static Specification<Finding> findingMatches(String query, String auditId, Severity severity, Boolean resolved) {
-        Specification<Finding> spec = (root, q, cb) -> cb.conjunction();
+    public static Specification<Finding> findingMatches(String organizationId, String query, String auditId,
+                                                        Severity severity, Boolean resolved) {
+        Specification<Finding> spec = inOrganization(organizationId);
         if (auditId != null && !auditId.isBlank()) {
             spec = spec.and((root, q, cb) -> cb.equal(root.get("auditId"), auditId));
         }
@@ -49,5 +51,10 @@ public final class Specs {
                     cb.like(cb.lower(root.get("owner")), like)));
         }
         return spec;
+    }
+
+    public static <T> Specification<T> inOrganization(String organizationId) {
+        Objects.requireNonNull(organizationId, "organizationId");
+        return (root, q, cb) -> cb.equal(root.get("organizationId"), organizationId);
     }
 }

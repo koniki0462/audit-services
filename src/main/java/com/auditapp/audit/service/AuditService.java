@@ -5,6 +5,7 @@ import com.auditapp.audit.domain.AuditStatus;
 import com.auditapp.audit.repository.AuditRepository;
 import com.auditapp.audit.repository.FindingRepository;
 import com.auditapp.audit.repository.Specs;
+import com.auditapp.audit.security.CurrentUser;
 import com.auditapp.audit.web.dto.AuditRequest;
 import com.auditapp.audit.web.dto.AuditResponse;
 import java.util.List;
@@ -18,14 +19,16 @@ public class AuditService {
 
     private final AuditRepository audits;
     private final FindingRepository findings;
+    private final CurrentUser currentUser;
 
-    public AuditService(AuditRepository audits, FindingRepository findings) {
+    public AuditService(AuditRepository audits, FindingRepository findings, CurrentUser currentUser) {
         this.audits = audits;
         this.findings = findings;
+        this.currentUser = currentUser;
     }
 
     public List<AuditResponse> list(String query, AuditStatus status) {
-        return audits.findAll(Specs.auditMatches(query, status), Sort.by("id")).stream()
+        return audits.findAll(Specs.auditMatches(currentUser.organizationId(), query, status), Sort.by("id")).stream()
                 .map(AuditResponse::from)
                 .toList();
     }
@@ -36,7 +39,7 @@ public class AuditService {
 
     @Transactional
     public AuditResponse create(AuditRequest request) {
-        Audit audit = new Audit("AUD-" + audits.nextSequence());
+        Audit audit = new Audit("AUD-" + audits.nextSequence(), currentUser.organizationId());
         apply(audit, request);
         return AuditResponse.from(audits.saveAndFlush(audit));
     }
@@ -52,12 +55,12 @@ public class AuditService {
     @Transactional
     public void delete(String id) {
         Audit audit = find(id);
-        findings.deleteByAuditId(id);
+        findings.deleteByOrganizationIdAndAuditId(audit.getOrganizationId(), id);
         audits.delete(audit);
     }
 
     Audit find(String id) {
-        return audits.findById(id).orElseThrow(() -> new NotFoundException("Audit", id));
+        return audits.findByIdAndOrganizationId(id, currentUser.organizationId()).orElseThrow(() -> new NotFoundException("Audit", id));
     }
 
     private static void apply(Audit audit, AuditRequest r) {

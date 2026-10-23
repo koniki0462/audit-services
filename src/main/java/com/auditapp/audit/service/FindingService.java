@@ -5,6 +5,7 @@ import com.auditapp.audit.domain.Severity;
 import com.auditapp.audit.repository.AuditRepository;
 import com.auditapp.audit.repository.FindingRepository;
 import com.auditapp.audit.repository.Specs;
+import com.auditapp.audit.security.CurrentUser;
 import com.auditapp.audit.web.dto.FindingRequest;
 import com.auditapp.audit.web.dto.FindingResponse;
 import java.util.List;
@@ -18,21 +19,23 @@ public class FindingService {
 
     private final FindingRepository findings;
     private final AuditRepository audits;
+    private final CurrentUser currentUser;
 
-    public FindingService(FindingRepository findings, AuditRepository audits) {
+    public FindingService(FindingRepository findings, AuditRepository audits, CurrentUser currentUser) {
         this.findings = findings;
         this.audits = audits;
+        this.currentUser = currentUser;
     }
 
     public List<FindingResponse> list(String query, String auditId, Severity severity, Boolean resolved) {
-        return findings.findAll(Specs.findingMatches(query, auditId, severity, resolved), Sort.by("id")).stream()
+        return findings.findAll(Specs.findingMatches(currentUser.organizationId(), query, auditId, severity, resolved), Sort.by("id")).stream()
                 .map(FindingResponse::from)
                 .toList();
     }
 
     public List<FindingResponse> listForAudit(String auditId) {
         requireAudit(auditId);
-        return findings.findByAuditIdOrderByIdAsc(auditId).stream().map(FindingResponse::from).toList();
+        return findings.findByOrganizationIdAndAuditIdOrderByIdAsc(currentUser.organizationId(), auditId).stream().map(FindingResponse::from).toList();
     }
 
     public FindingResponse get(String id) {
@@ -42,7 +45,7 @@ public class FindingService {
     @Transactional
     public FindingResponse create(FindingRequest request) {
         requireAudit(request.auditId());
-        Finding finding = new Finding("F-" + findings.nextSequence());
+        Finding finding = new Finding("F-" + findings.nextSequence(), currentUser.organizationId());
         apply(finding, request);
         return FindingResponse.from(findings.saveAndFlush(finding));
     }
@@ -68,11 +71,11 @@ public class FindingService {
     }
 
     private Finding find(String id) {
-        return findings.findById(id).orElseThrow(() -> new NotFoundException("Finding", id));
+        return findings.findByIdAndOrganizationId(id, currentUser.organizationId()).orElseThrow(() -> new NotFoundException("Finding", id));
     }
 
     private void requireAudit(String auditId) {
-        if (!audits.existsById(auditId)) {
+        if (!audits.existsByIdAndOrganizationId(auditId, currentUser.organizationId())) {
             throw new NotFoundException("Audit", auditId);
         }
     }

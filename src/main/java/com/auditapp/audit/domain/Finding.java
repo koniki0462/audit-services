@@ -19,6 +19,9 @@ public class Finding {
     @Id
     private String id;
 
+    @Column(name = "organization_id", nullable = false, updatable = false)
+    private String organizationId;
+
     @Column(name = "audit_id", nullable = false)
     private String auditId;
 
@@ -52,11 +55,13 @@ public class Finding {
     protected Finding() {
     }
 
-    public Finding(String id) {
+    public Finding(String id, String organizationId) {
         this.id = id;
+        this.organizationId = organizationId;
     }
 
     public String getId() { return id; }
+    public String getOrganizationId() { return organizationId; }
     public String getAuditId() { return auditId; }
     public void setAuditId(String auditId) { this.auditId = auditId; }
     public String getTitle() { return title; }
