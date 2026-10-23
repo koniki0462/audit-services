@@ -19,6 +19,9 @@ public class Audit {
     @Id
     private String id;
 
+    @Column(name = "organization_id", nullable = false, updatable = false)
+    private String organizationId;
+
     @Column(nullable = false)
     private String title;
 
@@ -58,11 +61,13 @@ public class Audit {
     protected Audit() {
     }
 
-    public Audit(String id) {
+    public Audit(String id, String organizationId) {
         this.id = id;
+        this.organizationId = organizationId;
     }
 
     public String getId() { return id; }
+    public String getOrganizationId() { return organizationId; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDepartment() { return department; }
