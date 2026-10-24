@@ -76,6 +76,11 @@ All paths are relative to `/api`. Errors are returned as RFC 9457 `application/p
 | GET | `/organization/members` | Members of the current organization |
 | POST | `/organization/members` | `{email}`. Adds an existing account. 404 if no account, 409 if already a member |
 | DELETE | `/organization/members/{userId}` | Removes a member; their tokens stop working at once. 409 for the last member |
+| GET | `/roles?active=` | Role catalogue by name (ADMIN, MANAGER, USER, GUEST are created by `V2`); `active` is optional |
+| GET | `/roles/{id}` | 404 if unknown |
+| POST | `/roles` | `{name, description?, isActive?}`. 201 + `Location`. The name is stored upper-case; 409 if taken (ignoring case) |
+| PUT | `/roles/{id}` | Full replace. 409 if the name is taken |
+| DELETE | `/roles/{id}` | 204 |
 | GET | `/audits?q=&status=` | `q` matches id, title, department or auditor, like `filterAudits`. |
 | GET | `/audits/{id}` | 404 if unknown |
 | GET | `/audits/{id}/findings` | Findings for one audit |
@@ -141,6 +146,6 @@ com.auditapp.audit
 
 ## Not included yet
 
-- **Roles and invitations.** Every member can do everything in their organization, and members are added by the email of an existing account (no invitation emails).
+- **Role enforcement and invitations.** `/roles` is a catalogue only: roles aren't assigned to users or checked on requests, so every member can do everything in their organization, and members are added by the email of an existing account (no invitation emails).
 - **Refresh tokens, password reset, login rate limiting.** Tokens simply expire after `JWT_TTL`.
 - **Pagination.** Lists return everything, which is fine at the front end's current scale.
