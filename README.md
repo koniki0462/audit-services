@@ -56,14 +56,9 @@ The dev profile seeds two users, both with password `password123`:
 | `demo@auditapp.dev` | Acme Corp (the six sample audits), Globex Ltd |
 | `owner@globex.dev` | Globex Ltd |
 
-On an existing database, migration `V2` moves the audits and findings created before multi-tenancy into an organization called "Default organization", which has no members yet. To claim it, sign up, then insert a membership row for your user, for example:
+## Database migrations
 
-```sql
-INSERT INTO memberships (id, user_id, organization_id)
-SELECT gen_random_uuid()::text, id, '00000000-0000-0000-0000-000000000001' FROM users WHERE email = 'you@example.com';
-```
-
-After that you can add colleagues from the app.
+Flyway owns the schema. `db/migration/V1__schema.sql` creates everything; `db/seed/V1_1__sample_data.sql` loads the sample data above and runs in the dev profile only. Add changes as new files (`V2__description.sql`, ...) and never edit one that has run on a shared database.
 
 ## API
 

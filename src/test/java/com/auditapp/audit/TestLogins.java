@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-/** Signs in as the dev seed's users (password "password123", see db/seed/V2_1). */
+/** Signs in as the dev seed's users (password "password123", see db/seed/V1_1__sample_data.sql). */
 final class TestLogins {
 
     static final String ACME = "00000000-0000-0000-0000-000000000001";

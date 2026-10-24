@@ -126,7 +126,7 @@ class OrganizationDetailsApiTest {
     }
 
     @Test
-    void migrationKeptExistingOrganizationsAndRenamedTheKey() {
+    void seededOrganizationsAreActive() {
         Integer rows = jdbc.queryForObject("""
                 select count(*) from organizations
                 where organization_id in ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002')
