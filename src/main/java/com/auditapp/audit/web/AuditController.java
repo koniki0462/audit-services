@@ -44,6 +44,7 @@ public class AuditController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get one audit")
     public AuditResponse get(@PathVariable String id) {
         return audits.get(id);
     }
@@ -55,6 +56,7 @@ public class AuditController {
     }
 
     @PostMapping
+    @Operation(summary = "Create an audit in the current organization; the server assigns its id")
     public ResponseEntity<AuditResponse> create(@Valid @RequestBody AuditRequest request) {
         AuditResponse created = audits.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.id()).toUri();
@@ -62,6 +64,7 @@ public class AuditController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Replace an audit")
     public AuditResponse update(@PathVariable String id, @Valid @RequestBody AuditRequest request) {
         return audits.update(id, request);
     }

@@ -38,12 +38,13 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get one role")
     public RoleResponse get(@PathVariable long id) {
         return roles.get(id);
     }
 
     @PostMapping
-    @Operation(summary = "Create a role; the name is stored upper-case and must be unique")
+    @Operation(summary = "Application admins: create a role; the name is stored upper-case and must be unique")
     public ResponseEntity<RoleResponse> create(@Valid @RequestBody RoleRequest request) {
         RoleResponse created = roles.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.id()).toUri();
@@ -51,12 +52,13 @@ public class RoleController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Replace a role's name, description and isActive")
+    @Operation(summary = "Application admins: replace a role's name, description and isActive")
     public RoleResponse update(@PathVariable long id, @Valid @RequestBody RoleRequest request) {
         return roles.update(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Application admins: delete a role")
     public ResponseEntity<Void> delete(@PathVariable long id) {
         roles.delete(id);
         return ResponseEntity.noContent().build();

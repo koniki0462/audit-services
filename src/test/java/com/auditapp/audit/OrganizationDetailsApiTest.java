@@ -104,7 +104,7 @@ class OrganizationDetailsApiTest {
         mvc.perform(as(globex, json(put("/organization"), "{\"legalName\":\"ACME CORP\"}")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail").value("An organization with this legal name already exists."));
-        mvc.perform(as(globex, json(post("/organizations"), "{\"legalName\":\"acme corp\"}")))
+        mvc.perform(as(TestLogins.token(mvc, DEMO), json(post("/organizations"), "{\"legalName\":\"acme corp\"}")))
                 .andExpect(status().isConflict());
         mvc.perform(json(post("/auth/signup"), """
                         {"name":"X","email":"x@new.test","password":"long-enough","organizationLegalName":"Globex Ltd"}

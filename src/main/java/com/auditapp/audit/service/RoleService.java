@@ -9,15 +9,20 @@ import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** CRUD for the global role catalogue. Roles aren't tied to an organization, so there is no tenant scoping here. */
+/**
+ * CRUD for the global role catalogue. Roles aren't tied to an organization, so there is no tenant scoping here.
+ * Anyone signed in can read the catalogue; only an application admin can change it.
+ */
 @Service
 @Transactional(readOnly = true)
 public class RoleService {
 
     private final RoleRepository roles;
+    private final Permissions permissions;
 
-    RoleService(RoleRepository roles) {
+    RoleService(RoleRepository roles, Permissions permissions) {
         this.roles = roles;
+        this.permissions = permissions;
     }
 
     public List<RoleResponse> list(Boolean active) {
@@ -31,6 +36,7 @@ public class RoleService {
 
     @Transactional
     public RoleResponse create(RoleRequest request) {
+        permissions.requireApplicationAdmin();
         String name = normaliseName(request.name());
         if (roles.existsByNameIgnoreCase(name)) {
             throw duplicate(name);
@@ -42,6 +48,7 @@ public class RoleService {
 
     @Transactional
     public RoleResponse update(long id, RoleRequest request) {
+        permissions.requireApplicationAdmin();
         Role role = find(id);
         String name = normaliseName(request.name());
         if (roles.existsByNameIgnoreCaseAndIdNot(name, id)) {
@@ -54,6 +61,7 @@ public class RoleService {
 
     @Transactional
     public void delete(long id) {
+        permissions.requireApplicationAdmin();
         roles.delete(find(id));
     }
 

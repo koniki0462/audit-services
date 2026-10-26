@@ -60,8 +60,15 @@ management:
 springdoc:
   swagger-ui:
     path: /docs
+    # Keep the token from "Authorize" across page reloads.
+    persist-authorization: true
+    try-it-out-enabled: true
+    display-request-duration: true
+    operations-sorter: method
   api-docs:
     path: /v3/api-docs
+  # application/problem+json errors are documented by OpenApiConfig instead.
+  override-with-generic-response: false
 
 ---
 # Development: PostgreSQL in Docker (the `db` service in docker-compose.yml), loaded with the same sample data

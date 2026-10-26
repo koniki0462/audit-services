@@ -1,5 +1,6 @@
 package com.auditapp.audit.web.dto;
 
+import com.auditapp.audit.domain.MemberRole;
 import java.time.Instant;
 import java.util.List;
 
@@ -9,5 +10,6 @@ public record TokenResponse(
         Instant expiresAt,
         UserResponse user,
         OrganizationResponse organization,
+        MemberRole role,
         List<OrganizationResponse> organizations) {
 }

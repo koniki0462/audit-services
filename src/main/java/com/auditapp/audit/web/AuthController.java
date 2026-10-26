@@ -7,6 +7,7 @@ import com.auditapp.audit.web.dto.SignupRequest;
 import com.auditapp.audit.web.dto.SwitchOrganizationRequest;
 import com.auditapp.audit.web.dto.TokenResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,12 +32,14 @@ public class AuthController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create an account and its first organization, and sign in")
+    @SecurityRequirements // public: no token needed
     public TokenResponse signup(@Valid @RequestBody SignupRequest request) {
         return auth.signup(request);
     }
 
     @PostMapping("/login")
     @Operation(summary = "Sign in. Returns a token for the given organization, or the first one by name")
+    @SecurityRequirements // public: no token needed
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return auth.login(request);
     }

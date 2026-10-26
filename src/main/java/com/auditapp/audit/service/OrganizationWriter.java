@@ -1,5 +1,6 @@
 package com.auditapp.audit.service;
 
+import com.auditapp.audit.domain.MemberRole;
 import com.auditapp.audit.domain.Membership;
 import com.auditapp.audit.domain.Organization;
 import com.auditapp.audit.repository.MembershipRepository;
@@ -19,7 +20,7 @@ class OrganizationWriter {
         this.memberships = memberships;
     }
 
-    /** Creates an organization with the given user as its first member. Call inside a transaction. */
+    /** Creates an organization with the given user as its first member and organization admin. Call inside a transaction. */
     Organization create(String userId, OrganizationDetailsRequest r) {
         String legalName = r.legalName().trim();
         if (organizations.existsByLegalNameIgnoreCase(legalName)) {
@@ -28,7 +29,7 @@ class OrganizationWriter {
         Organization organization = new Organization(AuthService.newId(), legalName);
         apply(organization, r);
         organizations.save(organization);
-        memberships.save(new Membership(AuthService.newId(), userId, organization.getId()));
+        memberships.save(new Membership(AuthService.newId(), userId, organization.getId(), MemberRole.ORG_ADMIN));
         return organization;
     }
 
@@ -55,7 +56,7 @@ class OrganizationWriter {
         o.setFiscalYearEndMonth(r.fiscalYearEndMonth());
     }
 
-    private static String blankToNull(String value) {
+    static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 

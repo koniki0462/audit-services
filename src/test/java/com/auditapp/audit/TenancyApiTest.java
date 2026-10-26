@@ -206,12 +206,12 @@ class TenancyApiTest {
         String lisa = signup("Lisa Simpson", "lisa@springfield.test", "Springfield Elementary");
         String globex = TestLogins.token(mvc, GLOBEX_OWNER);
 
-        mvc.perform(as(globex, json(post("/organization/members"), "{\"email\":\"lisa@springfield.test\"}")))
+        mvc.perform(as(globex, json(post("/organization/members/existing"), "{\"email\":\"lisa@springfield.test\"}")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Lisa Simpson"));
-        mvc.perform(as(globex, json(post("/organization/members"), "{\"email\":\"lisa@springfield.test\"}")))
+        mvc.perform(as(globex, json(post("/organization/members/existing"), "{\"email\":\"lisa@springfield.test\"}")))
                 .andExpect(status().isConflict());
-        mvc.perform(as(globex, json(post("/organization/members"), "{\"email\":\"nobody@springfield.test\"}")))
+        mvc.perform(as(globex, json(post("/organization/members/existing"), "{\"email\":\"nobody@springfield.test\"}")))
                 .andExpect(status().isNotFound());
         mvc.perform(as(globex, get("/organization/members"))).andExpect(jsonPath("$", hasSize(3)));
 

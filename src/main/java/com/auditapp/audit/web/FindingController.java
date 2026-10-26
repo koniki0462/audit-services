@@ -44,11 +44,13 @@ public class FindingController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get one finding")
     public FindingResponse get(@PathVariable String id) {
         return findings.get(id);
     }
 
     @PostMapping
+    @Operation(summary = "Raise a finding on an audit of the current organization; the server assigns its id")
     public ResponseEntity<FindingResponse> create(@Valid @RequestBody FindingRequest request) {
         FindingResponse created = findings.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.id()).toUri();
@@ -56,6 +58,7 @@ public class FindingController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Replace a finding")
     public FindingResponse update(@PathVariable String id, @Valid @RequestBody FindingRequest request) {
         return findings.update(id, request);
     }
@@ -67,6 +70,7 @@ public class FindingController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a finding")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         findings.delete(id);
         return ResponseEntity.noContent().build();

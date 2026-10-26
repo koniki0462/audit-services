@@ -2,6 +2,7 @@ package com.auditapp.audit.web;
 
 import com.auditapp.audit.service.DashboardService;
 import com.auditapp.audit.web.dto.DashboardSummary;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ public class DashboardController {
     }
 
     @GetMapping("/summary")
+    @Operation(summary = "Counts for the dashboard cards: audits by status, open findings by severity")
     public DashboardSummary summary() {
         return dashboard.summary();
     }

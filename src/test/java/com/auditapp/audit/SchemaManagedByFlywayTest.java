@@ -40,6 +40,6 @@ class SchemaManagedByFlywayTest {
         List<String> versions = jdbc.queryForList("""
                 select version from flyway_schema_history
                 where success and version is not null order by installed_rank""", String.class);
-        assertThat(versions).containsExactly("1", "1.1", "2");
+        assertThat(versions).containsExactly("1", "1.1", "2", "3", "3.1");
     }
 }

@@ -1,7 +1,10 @@
 package com.auditapp.audit.service;
 
+import com.auditapp.audit.domain.MemberRole;
+import com.auditapp.audit.domain.Membership;
 import com.auditapp.audit.domain.Organization;
 import com.auditapp.audit.domain.UserAccount;
+import com.auditapp.audit.repository.MembershipRepository;
 import com.auditapp.audit.repository.OrganizationRepository;
 import com.auditapp.audit.repository.UserAccountRepository;
 import com.auditapp.audit.security.CurrentUser;
@@ -27,6 +30,7 @@ public class AuthService {
 
     private final UserAccountRepository users;
     private final OrganizationRepository organizations;
+    private final MembershipRepository memberships;
     private final OrganizationWriter organizationWriter;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokens;
@@ -34,10 +38,12 @@ public class AuthService {
     /** Compared against when the email is unknown, so a login takes as long whether or not the account exists. */
     private final String unknownUserHash;
 
-    AuthService(UserAccountRepository users, OrganizationRepository organizations, OrganizationWriter organizationWriter,
-                PasswordEncoder passwordEncoder, TokenService tokens, CurrentUser currentUser) {
+    AuthService(UserAccountRepository users, OrganizationRepository organizations, MembershipRepository memberships,
+                OrganizationWriter organizationWriter, PasswordEncoder passwordEncoder, TokenService tokens,
+                CurrentUser currentUser) {
         this.users = users;
         this.organizations = organizations;
+        this.memberships = memberships;
         this.organizationWriter = organizationWriter;
         this.passwordEncoder = passwordEncoder;
         this.tokens = tokens;
@@ -45,7 +51,7 @@ public class AuthService {
         this.unknownUserHash = passwordEncoder.encode(UUID.randomUUID().toString());
     }
 
-    /** Creates a user and their first organization, with the user as its only member. */
+    /** Creates a user and their first organization, with the user as its only member and organization admin. */
     @Transactional
     public TokenResponse signup(SignupRequest r) {
         String email = normaliseEmail(r.email());
@@ -66,7 +72,7 @@ public class AuthService {
         }
         List<Organization> mine = organizations.findForUser(user.getId());
         if (mine.isEmpty()) {
-            throw new ForbiddenException("Your account isn't a member of any organization. Ask a member to add you.");
+            throw new ForbiddenException("Your account isn't a member of any organization. Ask an organization admin to add you.");
         }
         Organization organization = r.organizationId() == null || r.organizationId().isBlank()
                 ? mine.getFirst()
@@ -79,7 +85,8 @@ public class AuthService {
         UserAccount user = requireUser(currentUser.userId());
         List<Organization> mine = organizations.findForUser(user.getId());
         Organization organization = find(mine, currentUser.organizationId());
-        return new SessionResponse(UserResponse.from(user), OrganizationResponse.from(organization), toResponses(mine));
+        return new SessionResponse(UserResponse.from(user), OrganizationResponse.from(organization),
+                roleIn(user, organization), toResponses(mine));
     }
 
     /** A new token for another organization the caller belongs to. */
@@ -91,6 +98,11 @@ public class AuthService {
 
     public TokenResponse tokenFor(UserAccount user, Organization organization) {
         return tokenFor(user, organization, organizations.findForUser(user.getId()));
+    }
+
+    /** Hashes a new account's password. */
+    String encodePassword(String password) {
+        return passwordEncoder.encode(password);
     }
 
     UserAccount requireUser(String userId) {
@@ -108,7 +120,13 @@ public class AuthService {
     private TokenResponse tokenFor(UserAccount user, Organization organization, List<Organization> mine) {
         TokenService.IssuedToken token = tokens.issue(user.getId(), organization.getId());
         return new TokenResponse(token.value(), token.expiresAt(), UserResponse.from(user),
-                OrganizationResponse.from(organization), toResponses(mine));
+                OrganizationResponse.from(organization), roleIn(user, organization), toResponses(mine));
+    }
+
+    private MemberRole roleIn(UserAccount user, Organization organization) {
+        return memberships.findByUserIdAndOrganizationId(user.getId(), organization.getId())
+                .map(Membership::getRole)
+                .orElseThrow(() -> new NotFoundException("Organization", organization.getId()));
     }
 
     private static Organization find(List<Organization> mine, String organizationId) {

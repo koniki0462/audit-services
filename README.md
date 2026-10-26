@@ -19,7 +19,7 @@ docker compose --profile app up --build   # service + PostgreSQL in containers, 
 
 In the dev profile, Spring Boot's Docker Compose support starts the `db` service from `docker-compose.yml` (PostgreSQL 16 at `jdbc:postgresql://localhost:5432/audit`, user `myuser`, password `mypassword`; set `DB_HOST_PORT` if 5432 is taken) and connects to it. The container keeps running, and its data persists, between restarts. Flyway applies the migrations and the sample data on the first start only. To use a database you run yourself, set `SPRING_DOCKER_COMPOSE_ENABLED=false` and `DB_URL` / `DB_USERNAME` / `DB_PASSWORD`.
 
-- Swagger UI: http://localhost:4000/api/docs (disabled in `prod`)
+- Swagger UI: http://localhost:4000/api/docs (disabled in `prod`). Log in with `POST /auth/login`, click **Authorize** and paste the token; it is kept across reloads. The raw OpenAPI document is at `/api/v3/api-docs`.
 - Health: http://localhost:4000/api/actuator/health (`/liveness`, `/readiness`)
 
 ## Profiles and configuration
